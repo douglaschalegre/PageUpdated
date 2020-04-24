@@ -1,11 +1,13 @@
 #!/usr/bin/python
 import time
+import sys
 import requests
 import os
 
 def sendText(botMessage):
-    botToken = ''
-    botChatId = ''
+    botToken = '1173827382:AAGd13RVAbBRcVWNpcXAZHni-uEc7rdAS6E'
+    botChatId = '842357098' #meu id
+    #botChatId = '-300263333' #group id
     sendTxt = 'https://api.telegram.org/bot' + botToken + '/sendMessage?chat_id=' + botChatId + '&parse_mode=Markdown&text=' + botMessage
     response = requests.get(sendTxt)
 
@@ -18,6 +20,19 @@ def latestFile(file1,file2):
         return lines1[0]
     else:
         return lines2[0]
+
+def progressbar(it, prefix="", size=60, file=sys.stdout):
+    count = len(it)
+    def show(j):
+        x = int(size*j/count)
+        file.write("%s[%s%s] %i/%i\r" % (prefix, "#"*x, "."*(size-x), j, count))
+        file.flush()        
+    show(0)
+    for i, item in enumerate(it):
+        yield item
+        show(i+1)
+    file.write("\n")
+    file.flush()
 
 counter = 0
 while True:
@@ -47,7 +62,8 @@ while True:
         sendText('Olha só, o seguinte chamado foi aberto agora! \n {}'.format(latestFile('content.txt','contentaux.txt')))   
 
     counter += 1
-    time.sleep(10)
+    for i in progressbar(range(10), "Waiting: ", 13):
+        time.sleep(1) # any calculation you need
     f1.close()
     f2.close()
 
