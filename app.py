@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import time
 import requests
+import os
 
 def sendText(botMessage):
     botToken = ''
@@ -9,6 +10,14 @@ def sendText(botMessage):
     response = requests.get(sendTxt)
 
     return response.json()
+
+def latestFile(file1,file2):
+    infoFile1 = os.stat(file1)[9] # [9] acesses the st_mtime from the object
+    infoFile2 = os.stat(file2)[9] # which is the timestamp for file modification
+    if infoFile1 > infoFile2: #higher means most recently modified
+        return lines1[0]
+    else:
+        return lines2[0]
 
 counter = 0
 while True:
@@ -35,7 +44,7 @@ while True:
             
 
     if sendNotification == True:
-        sendText('Ei! Algo mudou... Fica de olho!')   
+        sendText('Olha só, o seguinte chamado foi aberto agora! \n {}'.format(latestFile('content.txt','contentaux.txt')))   
 
     counter += 1
     time.sleep(10)
