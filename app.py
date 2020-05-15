@@ -11,7 +11,7 @@ def sendText(botMessage):
     response = requests.get(sendTxt)
 
     return response.json()
-    
+
 def progressbar(it, prefix="", size=60, file=sys.stdout):
     count = len(it)
     def show(j):
@@ -24,18 +24,6 @@ def progressbar(it, prefix="", size=60, file=sys.stdout):
         show(i+1)
     file.write("\n")
     file.flush()
-
-def mostRecent(file1,file2):
-    infoFile1 = os.stat(file1)[9] # [9] acesses the st_mtime from the object
-    infoFile2 = os.stat(file2)[9] # which is the timestamp for file modification
-    if infoFile1 > infoFile2: #higher means most recently modified
-        return lines1
-    else:
-        return lines2
-
-def getTicket(file1,file2):
-        splitedWebPage = mostRecent(file1, file2)[1].split("'")
-        return splitedWebPage[3]
 
 def makeDatetime(line):
     splitedWebPage = line[8]
@@ -55,10 +43,33 @@ def getTime(line1,line2):
     a = makeDatetime(line1)
     b = makeDatetime(line2)
     if a>b:
-        return a
+        return [a,line1]
     elif b>a:
-        return b
+        return [b,line2]
 
+def getTicket():
+    mostRecent = getTime(lines1,lines2)[1]
+    splitedWebPage = mostRecent[1].split("'")
+    return splitedWebPage[3]
+
+def getTitleAndDesc():
+    mostRecent = getTime(lines1,lines2)[1]
+    splitedWebPage = mostRecent[1].split(">")
+    title = splitedWebPage[2][0:-3]
+    desc = splitedWebPage[4][0:-5]
+    return [title,desc]
+
+def getCategory():
+    mostRecent = getTime(lines1,lines2)[1]
+    splitedWebPage = mostRecent[5].split("'>")
+    category = splitedWebPage[1][0:-6]
+    return category
+
+def getTec():
+    mostRecent = getTime(lines1,lines2)[1]
+    splitedWebPage = mostRecent[3].split("'>")
+    tech = splitedWebPage[1][0:-7]
+    return tech
 
 counter = 0
 while True:
@@ -85,10 +96,14 @@ while True:
             
 
     if sendNotification == True:
-        ticket = getTicket('content.txt','contentaux.txt')
-        lastAtt = getTime(lines1,lines2)
-        description = 0
-        sendText('**Atenção!** o {} foi atualizado agora as {} \n {}'.format(ticket, lastAtt, description))   
+        ticket = getTicket()
+        lastAtt = getTime(lines1,lines2)[0]
+        cat = getCategory()
+        title  = getTitleAndDesc()[0]
+        description = getTitleAndDesc()[1]
+        tec = getTec()
+        
+        sendText('**Atenção!** o {} foi atualizado agora as {} \n\nCategoria: {}\n\nTitulo: {}\n\nDescrição: {}\n\nAtribuído para: {}'.format(ticket, lastAtt, cat, title, description, tec))   
 
     counter += 1
     for i in progressbar(range(10), "Waiting: ", 20):
