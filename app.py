@@ -86,11 +86,25 @@ while True:
     try:
         if lines1[0]==lines2[0]:
             print("Nenhuma mudança por aqui!")
+
         else:
-            sendNotification = True
-            print("[+] Text Sent!!")
-            print("content.txt: {}".format(lines1[0]))
-            print("contentaux.txt: {}".format(lines2[0]))
+            datef1 = makeDatetime(line1)
+            datef2 = makeDatetime(line2)
+            infoFile1 = os.stat('content.txt')[9] # [9] acesses the st_mtime from the object
+            infoFile2 = os.stat('contentaux.txt')[9] # which is the timestamp for file modification
+
+            if infoFile1 > infoFile2: #higher means most recently modified
+                if a > b: # Se o arquivo content.txt foi editado por ultimo e possui uma data mais recente então, um novo chamado foi aberto
+                    sendNotification = True
+                    print("[+] Text Sent!!")
+                    print("content.txt: {}".format(lines1[0]))
+                    print("contentaux.txt: {}".format(lines2[0]))
+            elif infoFile2 > infoFile1:
+                if b > a: # Se o arquivo contentaux.txt foi editado por ultimo e possui uma data mais recente então, um novo chamado foi aberto
+                    sendNotification = True
+                    print("[+] Text Sent!!")
+                    print("content.txt: {}".format(lines1[0]))
+                    print("contentaux.txt: {}".format(lines2[0]))     
     except:
         print("Oopsie! Probably writing file...")
             
@@ -106,8 +120,9 @@ while True:
         sendText('**Atenção!** o {} foi atualizado agora as {} \n\nCategoria: {}\n\nTitulo: {}\n\nDescrição: {}\n\nAtribuído para: {}'.format(ticket, lastAtt, cat, title, description, tec))   
 
     counter += 1
-    for i in progressbar(range(10), "Waiting: ", 20):
+    for i in progressbar(range(30), "Waiting: ", 30):
         time.sleep(1)
 
     f1.close()
     f2.close()
+
