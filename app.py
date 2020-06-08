@@ -25,6 +25,7 @@ def progressbar(it, prefix="", size=60, file=sys.stdout):
     file.write("\n")
     file.flush()
 
+# Page data extractions
 def makeDatetime(line):
     splitedWebPage = line[8]
     splitedWebPage = splitedWebPage.split(">")
@@ -71,57 +72,79 @@ def getTec():
     tech = splitedWebPage[1][0:-7]
     return tech
 
-counter = 0
+# Subprocess // Execute bash file
+class bash(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.daemon = True
+        self.start()
+    def run(self):
+        subprocess.Popen(['./dev.sh'], shell=True)
+
+# Main
+class message(Thread):
+    def __init__(self):
+        Thread.__init__(self)
+        self.daemon = True
+        self.start()
+    def run(self):
+        counter = 0
+        while True:
+            print(50*'=')
+            print('Run number: {}'.format(counter))
+            print(50*'=')
+            f1= open("content.txt","r")
+            f2= open("contentaux.txt","r")
+            lines1 = f1.readlines()
+            lines2 = f2.readlines()
+
+            sendNotification = False
+
+            try:
+                if lines1[0]==lines2[0]:
+                    print("Nenhuma mudança por aqui!")
+
+                else:
+                    datef1 = makeDatetime(line1)
+                    datef2 = makeDatetime(line2)
+                    infoFile1 = os.stat('content.txt')[9] # [9] acesses the st_mtime from the object
+                    infoFile2 = os.stat('contentaux.txt')[9] # which is the timestamp for file modification
+
+                    if infoFile1 > infoFile2: #higher means most recently modified
+                        if a > b: # Se o arquivo content.txt foi editado por ultimo e possui uma data mais recente então, um novo chamado foi aberto
+                            sendNotification = True
+                            print("[+] Text Sent!!")
+                            print("content.txt: {}".format(lines1[0]))
+                            print("contentaux.txt: {}".format(lines2[0]))
+                    elif infoFile2 > infoFile1:
+                        if b > a: # Se o arquivo contentaux.txt foi editado por ultimo e possui uma data mais recente então, um novo chamado foi aberto
+                            sendNotification = True
+                            print("[+] Text Sent!!")
+                            print("content.txt: {}".format(lines1[0]))
+                            print("contentaux.txt: {}".format(lines2[0]))     
+            except:
+                print("Oopsie! Probably writing file...")
+                    
+
+            if sendNotification == True:
+                ticket = getTicket()
+                lastAtt = getTime(lines1,lines2)[0]
+                cat = getCategory()
+                title  = getTitleAndDesc()[0]
+                description = getTitleAndDesc()[1]
+                tec = getTec()
+                
+                sendText('**Atenção!** o {} foi atualizado agora as {} \n\nCategoria: {}\n\nTitulo: {}\n\nDescrição: {}\n\nAtribuído para: {}'.format(ticket, lastAtt, cat, title, description, tec))   
+
+            counter += 1
+            for i in progressbar(range(20), "Waiting: ", 20):
+                time.sleep(1)
+
+            f1.close()
+            f2.close()
+
+
+bash()
+message()
 while True:
-    print(50*'=')
-    print('Run number: {}'.format(counter))
-    print(50*'=')
-    f1= open("content.txt","r")
-    f2= open("contentaux.txt","r")
-    lines1 = f1.readlines()
-    lines2 = f2.readlines()
-
-    sendNotification = False
-
-    try:
-        if lines1[0]==lines2[0]:
-            print("Nenhuma mudança por aqui!")
-
-        else:
-            datef1 = makeDatetime(line1)
-            datef2 = makeDatetime(line2)
-            infoFile1 = os.stat('content.txt')[9] # [9] acesses the st_mtime from the object
-            infoFile2 = os.stat('contentaux.txt')[9] # which is the timestamp for file modification
-
-            if infoFile1 > infoFile2: #higher means most recently modified
-                if a > b: # Se o arquivo content.txt foi editado por ultimo e possui uma data mais recente então, um novo chamado foi aberto
-                    sendNotification = True
-                    print("[+] Text Sent!!")
-                    print("content.txt: {}".format(lines1[0]))
-                    print("contentaux.txt: {}".format(lines2[0]))
-            elif infoFile2 > infoFile1:
-                if b > a: # Se o arquivo contentaux.txt foi editado por ultimo e possui uma data mais recente então, um novo chamado foi aberto
-                    sendNotification = True
-                    print("[+] Text Sent!!")
-                    print("content.txt: {}".format(lines1[0]))
-                    print("contentaux.txt: {}".format(lines2[0]))     
-    except:
-        print("Oopsie! Probably writing file...")
-            
-
-    if sendNotification == True:
-        ticket = getTicket()
-        lastAtt = getTime(lines1,lines2)[0]
-        cat = getCategory()
-        title  = getTitleAndDesc()[0]
-        description = getTitleAndDesc()[1]
-        tec = getTec()
-        
-        sendText('**Atenção!** o {} foi atualizado agora as {} \n\nCategoria: {}\n\nTitulo: {}\n\nDescrição: {}\n\nAtribuído para: {}'.format(ticket, lastAtt, cat, title, description, tec))   
-
-    counter += 1
-    for i in progressbar(range(30), "Waiting: ", 30):
-        time.sleep(1)
-
-    f1.close()
-    f2.close()
+    pass
